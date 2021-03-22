@@ -1,18 +1,18 @@
-%%%%% (A) Tonic spiking %%%%%
+%%%%% (D) Phasic bursting %%%%%
 
 % parameters
-a=0.02; b=0.2; c=-65; d=6;
+a=0.02; b=0.25; c=-55; d=0.05;
 
 % initial membrane potential
-v = -70;
+v = -64;
 
 % input current (when not zero)
-I = 14;
+I = 0.6;
 
 % length of the plot's x axis
-len_x = 100;
+len_x = 200;
 
 % name of the nauro-computational feature (for plots)
-name = "(A) Tonic spiking";
+name = "(D) Phasic bursting";
 
 izhikevich(a, b, c, d, v, I, len_x, name);
