@@ -1,11 +1,13 @@
-function [] = izhikevich(a, b, c, d, init_v, inp_curr, final_x, plot_title)
+%%%%% IZHIKEVICH'S MODEL %%%%%
+
+function [] = izhikevich(a, b, c, d, init_v, inp_curr, len_x, plot_title)
 %IZHIKEVICH Implementation of the Izhikevich model
 
 % tau: time interval
 % tspan: x axis for the plot
 % t1: time at which the input current steps up
 tau = 0.25;
-tspan = 0:tau:final_x;
+tspan = 0:tau:len_x;
 t1 = tspan(end) / 10;
 
 % v: membrane potential
@@ -43,8 +45,8 @@ legend("Membrane potential", "Input current")
 figure()
 plot(v_array, u_array)
 title(plot_title + " phase portrait")
-xlabel("Membrane potential")
-ylabel("Membrane recovery")
+xlabel("Membrane potential variable")
+ylabel("Recovery variable")
 
 end
 
