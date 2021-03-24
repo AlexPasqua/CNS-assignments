@@ -15,4 +15,4 @@ len_x = 200;
 % name of the nauro-computational feature (for plots)
 name = "(B) Phasic spiking";
 
-izhikevich(a, b, c, d, v, I, len_x, name);
+izhikevich("B", a, b, c, d, v, I, len_x, name);

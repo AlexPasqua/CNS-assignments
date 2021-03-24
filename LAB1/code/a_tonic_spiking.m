@@ -15,4 +15,4 @@ len_x = 100;
 % name of the nauro-computational feature (for plots)
 name = "(A) Tonic spiking";
 
-izhikevich(a, b, c, d, v, I, len_x, name);
+izhikevich("A", a, b, c, d, v, I, len_x, name);

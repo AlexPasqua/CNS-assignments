@@ -15,4 +15,4 @@ len_x = 85;
 % name of the nauro-computational feature (for plots)
 name = "(F) Spike frequency adaptation";
 
-izhikevich(a, b, c, d, v, I, len_x, name);
+izhikevich("F", a, b, c, d, v, I, len_x, name);

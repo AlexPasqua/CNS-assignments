@@ -15,4 +15,4 @@ len_x = 160;
 % name of the nauro-computational feature (for plots)
 name = "(E) Mixed mode";
 
-izhikevich(a, b, c, d, v, I, len_x, name);
+izhikevich("E", a, b, c, d, v, I, len_x, name);

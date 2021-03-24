@@ -15,4 +15,4 @@ len_x = 220;
 % name of the nauro-computational feature (for plots)
 name = "(C) Tonic bursting";
 
-izhikevich(a, b, c, d, v, I, len_x, name);
+izhikevich("C", a, b, c, d, v, I, len_x, name);
