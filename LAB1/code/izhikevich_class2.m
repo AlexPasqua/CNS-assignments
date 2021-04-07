@@ -1,6 +1,6 @@
 %%%%% IZHIKEVICH'S MODEL %%%%%
 
-function [] = izhikevich_ramp_input(a, b, c, d, init_v, len_x, plot_title)
+function [] = izhikevich_class2(a, b, c, d, init_v, len_x, plot_title)
 %IZHIKEVICH Implementation of the Izhikevich model
 
 % tau: time interval
