@@ -5,8 +5,9 @@ data = readmatrix("../lab2_1_data.csv");
 w = (1 + 1).*rand(height(data), 1) - 1;
 
 % iterate over epochs
-lr = 0.1;
-epochs = 20;
+lr = 0.01;
+epochs = 100;
+alpha = 0.1;
 w_evolution = zeros(3, epochs*length(data));
 idx = 1;
 for epoch = 1 : epochs
@@ -17,7 +18,8 @@ for epoch = 1 : epochs
     for n = 1 : length(data)
         pattern = data(:, n);
         output = dot(w, pattern);
-        w = w + (lr * output).*pattern;
+        delta_w = output.*pattern - alpha*output^2.*w;
+        w = w + lr .* delta_w;
         w_evolution(1, idx) = w(1);
         w_evolution(2, idx) = w(2);
         w_evolution(3, idx) = norm(w);
