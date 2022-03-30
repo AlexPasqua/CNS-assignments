@@ -18,8 +18,14 @@ inp_starts = [T1 T2 T3 T4];
     len_x, inp_starts, inp_span, inp_curr, tau, "L");
 
 % plot
+inp_x_axis = [
+    0 T1 T1 T1+inp_span T1+inp_span ...
+    T2 T2 T2+inp_span T2+inp_span ...
+    T3 T3 T3+inp_span T3+inp_span ...
+    T4 T4 T4+inp_span T4+inp_span max(tspan)];
+inp_y_axis = -90+[0 0 10 10 0 0 10 10 0 0 10 10 0 0 10 10 0 0];
 figure()
-plot(tspan, v_array, [0 t1 t1 t1+inp_span t1+inp_span max(tspan)], -90+[0 0 10 10 0 0]);
+plot(tspan, v_array, inp_x_axis, inp_y_axis);
 title(name)
 xlabel("Time")
 ylabel("Membrane potential")
