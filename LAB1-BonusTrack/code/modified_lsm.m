@@ -15,6 +15,7 @@ win_e = 5; win_i = 2;
 U=[win_e * rand(Ne,1);   win_i * rand(Ni,1)];
 %scaling of recurrent connections
 w_e = 0.5; w_i = -1;
+%the following matrix contains the recurrent (random) weights
 S=[w_e*rand(Ne+Ni,Ne),  -w_i*rand(Ne+Ni,Ni)];
 
 v=-65*ones(Ne+Ni,1);    % Initial values of v
