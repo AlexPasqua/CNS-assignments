@@ -18,9 +18,12 @@ for epoch = 1 : epochs
     for t = 1 : length(data)
         pattern = data(:, t);
         output = dot(w, pattern);
+        
+        % weights update
         term1 = output.*pattern;
         term2 = dot(n, pattern).*n ./ length(n);
         delta_w = term1 - term2';
+        
         w = w + lr .* delta_w;
         w_evolution(1, idx) = w(1);
         w_evolution(2, idx) = w(2);
@@ -35,32 +38,36 @@ Q = data * data';
 eigvals = diag(eigvals);
 [max_v, max_i] = max(eigvals);
 
-% plot 1
+% P1
 figure()
-plotv(eigvecs(:,max_i));
+plotv(eigvecs(:, max_i), '-')
 hold on
 scatter(data(1,:), data(2,:))
 hold on
-plotv(w./norm(w), '-')
+plotv(w ./ norm(w), '--')
 legend("Principal eigenvector of correlation matrix", "Training data points", "Weights vector")
+title("P1")
 
-% plot 2: 1st component of weights vector over time
+% P2: 1st component of weights vector over time
 figure()
 plot(w_evolution(1,:))
 xlabel("Time")
-ylabel("1st component of weights vector")
+ylabel("1st component of the weights vector")
+title("P2: 1st component of the weights vector over time")
 
-% plot 3: 2nd component of weights vector over time
+% P2: 2nd component of weights vector over time
 figure()
 plot(w_evolution(2,:))
 xlabel("Time")
-ylabel("2nd component of weights vector")
+ylabel("2nd component of the weights vector")
+title("P2: 2nd component of the weights vector over time")
 
-% plot 4: norm of weights vector over time
+% P2: norm of weights vector over time
 figure()
 plot(w_evolution(3,:))
 xlabel("Time")
-ylabel("Norm of weights vector")
+ylabel("Norm of the weights vector")
+title("P2: norm of the weights vector over time")
 
 % save evolution of weights vector in .mat format
 w_evolution = w_evolution(1:2, :);

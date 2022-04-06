@@ -1,14 +1,15 @@
 % read the data
 data = readmatrix("../lab2_1_data.csv");
 
-% uniformly initialize weight vector
-w = (1 + 1).*rand(height(data), 1) - 1;
+% uniformly initialize weight vector over [-1, 1]
+w = (1 + 1) .* rand(height(data), 1) - 1;
 
 % iterate over epochs
 lr = 0.01;
-epochs = 100;
 alpha = 0.1;
+epochs = 50;
 w_evolution = zeros(3, epochs*length(data));
+converged = false;
 idx = 1;
 for epoch = 1 : epochs
     % shuffle the data
@@ -18,8 +19,11 @@ for epoch = 1 : epochs
     for n = 1 : length(data)
         pattern = data(:, n);
         output = dot(w, pattern);
-        delta_w = output.*pattern - alpha*output^2.*w;
+        
+        % weights update
+        delta_w = output .* pattern - alpha * output^2 .* w;
         w = w + lr .* delta_w;
+        
         w_evolution(1, idx) = w(1);
         w_evolution(2, idx) = w(2);
         w_evolution(3, idx) = norm(w);
@@ -31,34 +35,38 @@ end
 Q = data * data';
 [eigvecs, eigvals] = eig(Q);
 eigvals = diag(eigvals);
-[max_v, max_i] = max(eigvals);
+[~, max_i] = max(eigvals);
 
-% plot 1
+% P1
 figure()
-plotv(eigvecs(:,max_i));
+plotv(eigvecs(:, max_i), '-')
 hold on
 scatter(data(1,:), data(2,:))
 hold on
-plotv(w./norm(w), '-')
+plotv(w ./ norm(w), '--')
 legend("Principal eigenvector of correlation matrix", "Training data points", "Weights vector")
+title("P1")
 
-% plot 2: 1st component of weights vector over time
+% P2: 1st component of weights vector over time
 figure()
 plot(w_evolution(1,:))
 xlabel("Time")
-ylabel("1st component of weights vector")
+ylabel("1st component of the weights vector")
+title("P2: 1st component of the weights vector over time")
 
-% plot 3: 2nd component of weights vector over time
+% P2: 2nd component of weights vector over time
 figure()
 plot(w_evolution(2,:))
 xlabel("Time")
-ylabel("2nd component of weights vector")
+ylabel("2nd component of the weights vector")
+title("P2: 2nd component of the weights vector over time")
 
-% plot 4: norm of weights vector over time
+% P2: norm of weights vector over time
 figure()
 plot(w_evolution(3,:))
 xlabel("Time")
-ylabel("Norm of weights vector")
+ylabel("Norm of the weights vector")
+title("P2: norm of the weights vector over time")
 
 % save evolution of weights vector in .mat format
 w_evolution = w_evolution(1:2, :);
