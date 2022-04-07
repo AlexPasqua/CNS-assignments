@@ -1,30 +1,36 @@
 %%%%% (S) Inhibition-induced spiking %%%%%
+
 % parameters
 a=-0.02; b=-1; c=-60; d=8;
-% initial membrane potential
-v = -63.8;
-u = b * v;
-% length of the plot's x axis
-len_x = 350;
-% name of the nauro-computational feature (for plots)
-name = "(S) Inhibition-induced spiking";
 
-inp_span = 200; tau = 0.5; tspan = 0:tau:len_x;
-t1=50;
-idx = 1;
+% length of the plot's x axis
+% tau: time interval
+% tspan: x axis for the plot
+% t1: time at which the input current steps up
+len_x = 350;
+tau = 0.5;
+tspan = 0:tau:len_x;
+t1 = 50;
+inp_span = 200;
+
+% v: membrane potential
+% u: membrane recovery variable
+v = -63.8; u = b*v;
 v_array = zeros(size(tspan));
 u_array = zeros(size(tspan));
 
-% Implementation of the Izhikevich model directly here (no func called)
-for t=tspan
+idx = 1;
+for t = tspan
     if t < t1 || t > t1 + inp_span
         I=80;
     else
         I=75;
     end
-    v = v + tau*(0.04*v^2 + 5*v + 140 - u + I);
-    u = u + tau*a*(b*v - u);
-    if v > 30
+    
+    % Izhikevich equations
+    [v, u] = izhikevich(a, b, v, u, I, tau);
+    
+    if v >= 30
         v_array(idx) = 30;
         v = c;
         u = u + d;
@@ -36,16 +42,20 @@ for t=tspan
 end
 
 % plot
-figure()
-plot(tspan, v_array, [0 t1 t1 t1+inp_span t1+inp_span max(tspan)], ...
-    -80+[0 0 -10 -10 0 0]);
-title(name)
+figure
+tl = tiledlayout(1, 2);
+title(tl, "(S) Inhibition-induced spiking");
+ax1 = nexttile;
+inp_x_axis = [0 t1 t1 t1+inp_span t1+inp_span max(tspan)];
+inp_y_axis = -80+[0 0 -10 -10 0 0]; 
+plot(tspan, v_array, inp_x_axis, inp_y_axis);
+title(ax1, "Membrane potential dynamics")
 xlabel("Time")
 ylabel("Membrane potential")
 legend("Membrane potential", "Input current")
 
-figure()
+ax2 = nexttile;
 plot(v_array, u_array)
-title(name + " phase portrait")
+title("Phase portrait")
 xlabel("Membrane potential variable")
 ylabel("Recovery variable")

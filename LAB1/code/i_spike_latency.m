@@ -3,27 +3,54 @@
 % parameters
 a=0.02; b=0.2; c=-65; d=6;
 
-% initial membrane potential
-v = -70;
+len_x = 100;    % length of the plot's x axis
+tau = 0.2;     % time interval
+tspan = 0:tau:len_x;    % x axis for the plot
+t1 = 10;   % time at which the input current steps up
+inp_span = 3;   % duration of the input stimulation
+inp_curr = 7.04;    % input current (when not zero)
 
-% length of the plot's x axis
-len_x = 100;
+% v: membrane potential
+% u: membrane recovery variable
+v = -70; u = b*v;
+v_array = zeros(size(tspan));
+u_array = zeros(size(tspan));
 
-% name of the nauro-computational feature (for plots)
-name = "(I) Spike latency";
-t1 = 10; inp_span = 3; inp_curr = 7.04; tau = 0.2;
-[tspan, v_array, u_array] = izhikevich_interval_inputs(a, b, c, d, v, ...
-    len_x, [t1], inp_span, inp_curr, tau, "I");
+idx = 1;
+for t = tspan
+    if t > t1 && t < t1 + inp_span
+        I = inp_curr;
+    else
+        I = 0;
+    end
+    
+    % Izhikevich equations
+    [v, u] = izhikevich(a, b, v, u, I, tau);
+        
+    if v >= 30
+        v_array(idx) = 30;
+        v = c;
+        u = u + d;
+    else
+        v_array(idx) = v;
+    end
+    u_array(idx) = u;
+    idx = idx + 1;
+end
 
 % plot
-figure()
+figure
+tl = tiledlayout(1, 2);
+title(tl, "(I) Spike latency")
+ax1 = nexttile;
 plot(tspan, v_array, [0 t1 t1 t1+inp_span t1+inp_span max(tspan)], -90+[0 0 10 10 0 0]);
-title(name)
+title(ax1, "Membrane potential dynamics")
 xlabel("Time")
 ylabel("Membrane potential")
 legend("Membrane potential", "Input current")
-figure()
+
+ax2 = nexttile;
 plot(v_array, u_array)
-title(name + " phase portrait")
+title("Phase portrait")
 xlabel("Membrane potential variable")
 ylabel("Recovery variable")
