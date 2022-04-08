@@ -1,26 +1,7 @@
-% function[] = hopfield_network()
-% load the data into 3 vectors: p0, p1, p3 representing 3 images of digits
-load lab2_2_data.mat p0 p1 p2
-n_patterns = 3;
-n_neurons = length(p0);
-dataset = [p0, p1, p2];
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% STORAGE PHASE: (learning) set the net's weights
-s = zeros(n_neurons, n_neurons);
-for mu = 1 : n_patterns
-    pattern = dataset(:, mu);
-    s = s + pattern * pattern';
-end
-w = (s - n_patterns .* eye(n_neurons)) ./ n_neurons;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [] = hopfield_retrieval_phase(patterns)
 % RETRIEVAL PHASE
 % initialization
-state = p0;     % p0 selected as "probe pattern"
+state = patterns(:, 1);     % first pattern selected as "probe pattern"
 
 % iterate over epochs
 epochs = 100;
@@ -55,7 +36,4 @@ for ep = 1 : epochs
     
     
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-figure
-plot(energies)
+end
