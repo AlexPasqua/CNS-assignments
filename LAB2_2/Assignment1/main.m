@@ -2,10 +2,10 @@
 load lab2_2_data.mat p0 p1 p2
 n_patterns = 3;
 n_neurons = length(p0);
-fundamental_memories = [p0, p1, p2];
+fundam_mems = [p0, p1, p2];
 
 % train the Hopfield network with the fundamental memories
-W = hopfield_storage_phase(fundamental_memories);
+W = hopfield_storage_phase(fundam_mems);
 
 % generate distorted version of the 3 patterns
 dist_percs = [0.05 0.1 0.25];   % 3 distortion percentages
@@ -17,4 +17,16 @@ for i = 1 : length(dist_percs)
     p1_dist(:, i) = distort_image(p1, dist_percs(i));
     p2_dist(:, i) = distort_image(p2, dist_percs(i));
 end
+
+% retrieval phase
+[energy, overlaps] = hopfield_retrieval_phase(W, fundam_mems, p0_dist(:,1), 2);
+
+% plots
+figure
+plot(energy)
+title("Energy as function of time")
+
+figure
+plot(overlaps')
+
 
