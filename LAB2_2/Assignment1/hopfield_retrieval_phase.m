@@ -1,23 +1,26 @@
-function [energies, overlaps] = hopfield_retrieval_phase(W, fundam_mems, dist_pattern, n_epochs)
+function [energies, overlaps, state] = hopfield_retrieval_phase(W, fundam_mems, dist_pattern, n_epochs)
 % RETRIEVAL PHASE
 % initialization
 state = dist_pattern;     % initialization of the state with "probe pattern"
 
 % iterate over epochs
 n_neurons = length(dist_pattern);
-% n_patterns = size(pattern, 2);
 n_fundam_mems = size(fundam_mems, 2);
 overlaps = zeros(n_fundam_mems, n_epochs * n_neurons);
 energies = zeros(1, n_epochs * n_neurons);
+bias = 0.5;
 t = 1;
 for ep = 1 : n_epochs
+    % save the state of the prev iteration
+    old_state = state;
+    
     % pick a random order of the neurons
     rand_order = randperm(n_neurons);
     
     % iterate over neurons in the random order to compute the state
     for j = rand_order
         weighted_sum = W(j,:) * state;
-        state(j) = sign(weighted_sum);
+        state(j) = sign(weighted_sum + bias);
         % if the neuron's value is 0, set it to 1 (neurons can be either +1 or -1)
         if state(j) == 0
             state(j) = 1;
@@ -32,7 +35,9 @@ for ep = 1 : n_epochs
         t = t + 1;
     end
     
-    % TODO: STOPPING CRITERION
-    
+    % stopping criterion
+    if state == old_state
+        break
+    end
 end
 end

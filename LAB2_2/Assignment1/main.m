@@ -9,24 +9,38 @@ W = hopfield_storage_phase(fundam_mems);
 
 % generate distorted version of the 3 patterns
 dist_percs = [0.05 0.1 0.25];   % 3 distortion percentages
-p0_dist = zeros(length(p0), length(dist_percs));
-p1_dist = zeros(length(p1), length(dist_percs));
-p2_dist = zeros(length(p2), length(dist_percs));
-for i = 1 : length(dist_percs)
-    p0_dist(:, i) = distort_image(p0, dist_percs(i));
-    p1_dist(:, i) = distort_image(p1, dist_percs(i));
-    p2_dist(:, i) = distort_image(p2, dist_percs(i));
+p0_dist1 = distort_image(p0, dist_percs(1));
+p0_dist2 = distort_image(p0, dist_percs(2));
+p0_dist3 = distort_image(p0, dist_percs(3));
+p1_dist1 = distort_image(p1, dist_percs(1));
+p1_dist2 = distort_image(p1, dist_percs(2));
+p1_dist3 = distort_image(p1, dist_percs(3));
+p2_dist1 = distort_image(p2, dist_percs(1));
+p2_dist2 = distort_image(p2, dist_percs(2));
+p2_dist3 = distort_image(p2, dist_percs(3));
+dist_patterns = [p0_dist1 p0_dist2 p0_dist3 p1_dist1 p1_dist2 p1_dist3 ...
+    p2_dist1 p2_dist2 p2_dist3];
+title_prefixes = ["P0 dist 0.05", "P0 dist 0.1", "P0 dist 0.25", "P1 dist 0.05", ...
+    "P1 dist 0.1", "P1 dist 0.25", "P2 dist 0.05", "P2 dist 0.1", "P2 dist 0.25"];
+
+% feed the Hopfield network with all the distorted patterns
+for i = 1 : size(dist_patterns, 2)
+    % retrieval phase
+    [energy, overlaps, state] = hopfield_retrieval_phase(W, fundam_mems, dist_patterns(:,i), 2);
+
+    % plot energy
+    figure
+    plot(energy)
+    title(strcat(title_prefixes(i), ": Energy as function of time"))
+    
+    % plot overlaps
+    figure
+    plot(overlaps')
+    title(strcat(title_prefixes(i), ": Overlaps with fundamental memories as a function of time"))
+    legend("Overlap with p0", "Overlap with p1", "Overlap with p2")
+    
+    % plot reconstructed image
+    figure
+    imshow(reshape(state, 32, 32))
+    title(strcat(title_prefixes(i), ": Reconstructed image"))
 end
-
-% retrieval phase
-[energy, overlaps] = hopfield_retrieval_phase(W, fundam_mems, p0_dist(:,1), 2);
-
-% plots
-figure
-plot(energy)
-title("Energy as function of time")
-
-figure
-plot(overlaps')
-
-
