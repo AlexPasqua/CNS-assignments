@@ -1,7 +1,7 @@
 % import the dataset
 load NARMA10timeseries.mat
-input = cell2mat(NARMA10timeseries.input)';
-target = cell2mat(NARMA10timeseries.target)';
+input = cell2mat(NARMA10timeseries.input);
+target = cell2mat(NARMA10timeseries.target);
 
 % split data into training, validation and test sets
 dev_input = input(1 : 5000);
@@ -39,4 +39,15 @@ for guess = 1 : reservoir_guesses
         end
         X(:,t) = tanh(Win*[tr_input(t);1] + Wr*prev_state);
     end
+    
+    % washout
+    X = X(:, initial_transient+1 : end);
+    tr_target_cut = tr_target(:, initial_transient+1 : end);
+    
+    % readout training
+    X = [X; ones(1, length(tr_target_cut))];
+    Wout = tr_target_cut * pinv(X);
+    
+    % evaluation
+    
 end
