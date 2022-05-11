@@ -1,7 +1,7 @@
 % import the dataset
 load NARMA10timeseries.mat
-input = cell2mat(NARMA10timeseries.input);
-target = cell2mat(NARMA10timeseries.target);
+input = cell2mat(NARMA10timeseries.input)';
+target = cell2mat(NARMA10timeseries.target)';
 
 % split data into training, validation and test sets
 dev_input = input(1 : 5000);
@@ -18,6 +18,25 @@ clear dev_input dev_target
 Nr = 50;
 inputScaling = 0.1;
 rho_desired = 0.1;
-[Win, Wr] = esn(inputScaling, 1, Nr, rho_desired);
+
+
+% TODO: random search of hyperparameters
+
 
 % train ESN
+reservoir_guesses = 10;
+initial_transient = 500;
+for guess = 1 : reservoir_guesses
+    [Win, Wr] = esn(inputScaling, 1, Nr, rho_desired);
+    
+    % compute the states for the training input sequence
+    X = zeros(Nr, length(tr_input));   % states matrix
+    for t = 1 : length(tr_input)
+        if t == 1
+            prev_state = zeros(Nr, 1);
+        else
+            prev_state = X(:, t-1);
+        end
+        X(:,t) = tanh(Win*[tr_input(t);1] + Wr*prev_state);
+    end
+end
