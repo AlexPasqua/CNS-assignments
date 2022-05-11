@@ -1,0 +1,1 @@
+load NARMA10timeseries.mat
