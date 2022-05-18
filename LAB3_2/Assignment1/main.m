@@ -4,15 +4,8 @@ input = cell2mat(NARMA10timeseries.input);
 target = cell2mat(NARMA10timeseries.target);
 
 % split data into training, validation and test sets
-dev_input = input(1 : 5000);
-dev_target = target(1 : 5000);
-tr_input = dev_input(1 : 4000);
-tr_target = dev_target(1 : 4000);
-val_input = dev_input(4001 : end);
-val_target = dev_target(4001 : end);
-ts_input = input(5001 : end);
-ts_target = target(5001 : end);
-clear dev_input dev_target
+[tr_input, tr_target, val_input, val_target, ts_input, ts_target] = ...
+    train_val_test_split(input, target, 4000, 1000);
 
 % create ESN
 Nr = 50;
