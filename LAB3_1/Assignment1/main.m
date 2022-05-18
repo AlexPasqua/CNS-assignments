@@ -34,6 +34,13 @@ for i = 1 : n_trials
     rnn = layrecnet(1, hiddenSizes, trainFcn);
     % view(rnn)
     
-    [tdnn_Xs, rdnn_Xi, tdnn_Ai, tdnn_Ts, tdnn_EWs, tdnn_shift] = ...
+    % prepare the time series for the two nets
+    [tdnn_Xs, tdnn_Xi, tdnn_Ai, tdnn_Ts, tdnn_EWs, tdnn_shift] = ...
         preparets(tdnn, tr_input, tr_target);
+%     [rnn_Xs, rnn_Xi, rnn_Ai, rnn_Ts, rnn_EWs, rnn_shift] = ...
+%         preparets(rnn, tr_input, tr_target);
+%     
+%     % train the nets
+%     [trained_tdnn, tdnn_hist] = train(tdnn, tdnn_Xs, tdnn_Ts);
+%     [trained_rnn, rnn_hist] = train(rnn, rnn_Xs, rnn_Ts);
 end
