@@ -27,24 +27,12 @@ for epoch = 1 : epochs
         delta_w = term1 - term2';
         w_new = w + lr .* delta_w;
         
-        w_evolution(:, end+1) = w_new;
-        w_norm_evolution(end+1) = norm(w_new);
-        
-        if epoch > 5 && norm(w_new - w) < 0.0001
-            converged = true;
-            w = w_new;
-            disp("Learning converged before reaching maximum epochs")
-            disp(strcat("Epochs completed: ", string(epoch)))
-            break
-        end
-        
         w = w_new;
         idx = idx + 1;
     end
     
-    if converged
-        break
-    end
+    w_evolution(:, end+1) = w_new;
+    w_norm_evolution(end+1) = norm(w_new);
 end
 
 % correltion matrix and eigenvector

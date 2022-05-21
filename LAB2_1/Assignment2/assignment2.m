@@ -11,7 +11,6 @@ epochs = 50;
 w_evolution = [];
 w_norm_evolution = [];
 converged = false;
-idx = 1;
 for epoch = 1 : epochs
     % shuffle the data
     data = data(:, randperm(length(data)));
@@ -25,10 +24,7 @@ for epoch = 1 : epochs
         delta_w = output .* pattern - alpha * output^2 .* w;
         w_new = w + lr .* delta_w;
         
-        w_evolution(:, end+1) = w_new;
-        w_norm_evolution(end+1) = norm(w_new);
-        
-        if epoch > 5 && norm(w_new - w) < 0.0001
+        if norm(w_new - w) < 0.00001
             converged = true;
             w = w_new;
             disp("Learning converged before reaching maximum epochs")
@@ -37,8 +33,10 @@ for epoch = 1 : epochs
         end
         
         w = w_new;
-        idx = idx + 1;
     end
+    
+    w_evolution(:, end+1) = w_new;
+    w_norm_evolution(end+1) = norm(w_new);
     
     if converged
         break
