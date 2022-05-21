@@ -23,24 +23,42 @@ for i = 1 : n_trials
     % randomly select hyperparameters
     inputDelays = randi(max_inputDelay);
     hiddenSizes = randi(max_hiddenSize, [1 randi(max_n_hiddenLayers)]);
+    lr = rand;
     trainFcn = cell2mat(datasample(train_funcs, 1));
-    conf = struct('inputDelays', inputDelays, 'hiddenSizes', hiddenSizes, 'trainFcn', trainFcn);
+    conf = struct('inputDelays', inputDelays, 'hiddenSizes', hiddenSizes, ...
+        'lr', lr, 'trainFcn', trainFcn);
     
     % time delay neural network
     tdnn = timedelaynet(0:inputDelays, hiddenSizes, trainFcn);
-    % view(tdnn)
+    tdnn.divideFcn = "dividetrain";
+    tdnn.trainParam.lr = lr;
+%     view(tdnn)
     
     % recurrent neural network    
     rnn = layrecnet(1, hiddenSizes, trainFcn);
-    % view(rnn)
+    rnn.divideFcn = "dividetrain";
+    rnn.trainParam.lr = lr;
+%     view(rnn)
     
     % prepare the time series for the two nets
-    [tdnn_Xs, tdnn_Xi, tdnn_Ai, tdnn_Ts, tdnn_EWs, tdnn_shift] = ...
-        preparets(tdnn, tr_input, tr_target);
-%     [rnn_Xs, rnn_Xi, rnn_Ai, rnn_Ts, rnn_EWs, rnn_shift] = ...
-%         preparets(rnn, tr_input, tr_target);
-%     
-%     % train the nets
-%     [trained_tdnn, tdnn_hist] = train(tdnn, tdnn_Xs, tdnn_Ts);
-%     [trained_rnn, rnn_hist] = train(rnn, rnn_Xs, rnn_Ts);
+    % TDNN training set
+    [tdnn_Xs_tr, tdnn_Xi_tr, tdnn_Ai_tr, tdnn_Ts_tr, tdnn_EWs_tr, tdnn_shift] = ...
+        preparets(tdnn, num2cell(tr_input), num2cell(tr_target));
+    % RNN training set
+    [rnn_Xs_tr, rnn_Xi_tr, rnn_Ai_tr, rnn_Ts_tr, rnn_EWs_tr, rnn_shift] = ...
+        preparets(rnn, num2cell(tr_input), num2cell(tr_target));
+    % TDNN validation set
+    [tdnn_Xs_val, tdnn_Xi_val, tdnn_Ai_val, tdnn_Ts_val, tdnn_EWs_val, tdnn_shift] = ...
+        preparets(tdnn, num2cell(tr_input), num2cell(tr_target));
+    % RNN validation set
+    [rnn_Xs_val, rnn_Xi_val, rnn_Ai_val, rnn_Ts_val, rnn_EWs_val, rnn_shift] = ...
+        preparets(rnn, num2cell(tr_input), num2cell(tr_target));
+    
+    % train the nets
+    [trained_tdnn, tdnn_hist] = train(tdnn, tdnn_Xs_tr, tdnn_Ts_tr, tdnn_Xi_tr, tdnn_Ai_tr);
+    [trained_rnn, rnn_hist] = train(rnn, rnn_Xs_tr, rnn_Ts_tr, rnn_Xi_tr, rnn_Ai_tr);
+    
+    % validation
+    tdnn_val_out = tdnn(tdnn_Xs_val, tdnn_Xi_val, tdnn_Ai_val);
+    mse_val = immse(tdnn_val_out, tdnn_Ts_val);
 end
