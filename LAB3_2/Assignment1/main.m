@@ -14,7 +14,7 @@ reservoir_guesses = 10;
 initial_transient = 500;
 for conf = 1 : n_configs
     % ESN's (random) parameters
-    [Nr, inputScaling, rho_desired, lambda, mode] = get_rand_hyperparametrization();
+    [Nr, inputScaling, rho_desired, lambda, mode] = get_rand_hyperparametrization(max_Nr);
 
     % train ESN (for a certain number of reservoir guesses)
     best_hyper_conf = get_hyperparams_conf(Nr, inputScaling, rho_desired, lambda, mode);    
