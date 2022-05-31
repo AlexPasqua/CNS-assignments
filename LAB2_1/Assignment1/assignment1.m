@@ -5,11 +5,10 @@ data = readmatrix("../lab2_1_data.csv");
 w = (1 + 1) .* rand(height(data), 1) - 1;
 
 % iterate over epochs
-lr = 0.1;
+lr = 0.005;
 epochs = 50;
-w_evolution = zeros(3, epochs*length(data));
+w_evolution = zeros(3, epochs);
 converged = false;
-idx = 1;
 for epoch = 1 : epochs
     % shuffle the data
     data = data(:, randperm(length(data)));
@@ -21,13 +20,9 @@ for epoch = 1 : epochs
         
         % weights update
         w_new = w + (lr * output) .* pattern;
-        
-        w_evolution(1, idx) = w_new(1);
-        w_evolution(2, idx) = w_new(2);
-        w_evolution(3, idx) = norm(w_new);
 
         % terminate learning if converged
-        if epoch > 5 && norm(w_new - w) < 0.01
+        if norm(w_new - w) < 0.00001
             converged = true;
             w = w_new;
             disp("Learning converged before reaching maximum epochs")
@@ -36,8 +31,11 @@ for epoch = 1 : epochs
         end
         
         w = w_new;
-        idx = idx + 1;
     end
+    
+    w_evolution(1, epoch) = w_new(1);
+    w_evolution(2, epoch) = w_new(2);
+    w_evolution(3, epoch) = norm(w_new);
 
     if converged
         break

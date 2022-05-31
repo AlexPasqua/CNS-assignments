@@ -5,12 +5,12 @@ data = readmatrix("../lab2_1_data.csv");
 w = (1 + 1) .* rand(height(data), 1) - 1;
 
 % iterate over epochs
-lr = 0.01;
-alpha = 0.1;
+lr = 0.009;
+alpha = 0.009;
 epochs = 50;
-w_evolution = zeros(3, epochs*length(data));
+w_evolution = [];
+w_norm_evolution = [];
 converged = false;
-idx = 1;
 for epoch = 1 : epochs
     % shuffle the data
     data = data(:, randperm(length(data)));
@@ -22,12 +22,24 @@ for epoch = 1 : epochs
         
         % weights update
         delta_w = output .* pattern - alpha * output^2 .* w;
-        w = w + lr .* delta_w;
+        w_new = w + lr .* delta_w;
         
-        w_evolution(1, idx) = w(1);
-        w_evolution(2, idx) = w(2);
-        w_evolution(3, idx) = norm(w);
-        idx = idx + 1;
+        if norm(w_new - w) < 0.00001
+            converged = true;
+            w = w_new;
+            disp("Learning converged before reaching maximum epochs")
+            disp(strcat("Epochs completed: ", string(epoch)))
+            break
+        end
+        
+        w = w_new;
+    end
+    
+    w_evolution(:, end+1) = w_new;
+    w_norm_evolution(end+1) = norm(w_new);
+    
+    if converged
+        break
     end
 end
 
@@ -63,11 +75,10 @@ title("P2: 2nd component of the weights vector over time")
 
 % P2: norm of weights vector over time
 figure()
-plot(w_evolution(3,:))
+plot(w_norm_evolution)
 xlabel("Time")
 ylabel("Norm of the weights vector")
 title("P2: norm of the weights vector over time")
 
 % save evolution of weights vector in .mat format
-w_evolution = w_evolution(1:2, :);
 save('w_evolution.mat', 'w_evolution');

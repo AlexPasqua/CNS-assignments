@@ -2,14 +2,14 @@ function [energies, overlaps, state] = hopfield_retrieval_phase(W, fundam_mems, 
 % RETRIEVAL PHASE
 % initialization
 state = dist_pattern;     % initialization of the state with "probe pattern"
-
-% iterate over epochs
 n_neurons = length(dist_pattern);
 n_fundam_mems = size(fundam_mems, 2);
 overlaps = zeros(n_fundam_mems, n_epochs * n_neurons);
 energies = zeros(1, n_epochs * n_neurons);
 bias = 0.5;
 t = 1;
+
+% iterate over epochs
 for ep = 1 : n_epochs
     % save the state of the prev iteration
     old_state = state;
@@ -37,7 +37,10 @@ for ep = 1 : n_epochs
     
     % stopping criterion
     if state == old_state
-        break
+        % remove unused zero-initialized part of the arrays 'overlaps' and 'energies'
+        overlaps = overlaps(:, 1:t-1);
+        energies = energies(1:t-1);
+        return
     end
 end
 end

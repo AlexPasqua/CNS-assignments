@@ -26,7 +26,7 @@ title_prefixes = ["P0 dist 0.05", "P0 dist 0.1", "P0 dist 0.25", "P1 dist 0.05",
 % feed the Hopfield network with all the distorted patterns
 for i = 1 : size(dist_patterns, 2)
     % retrieval phase
-    [energy, overlaps, state] = hopfield_retrieval_phase(W, fundam_mems, dist_patterns(:,i), 2);
+    [energy, overlaps, state] = hopfield_retrieval_phase(W, fundam_mems, dist_patterns(:,i), 10);
 
     % plot energy
     figure
