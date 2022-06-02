@@ -8,105 +8,81 @@ target = cell2mat(NARMA10timeseries.target);
     train_val_test_split(input, target, 4000, 1000);
 
 % random search of hyperparameters
-n_configs = 10;
+n_configs = 2;
 max_Nr = 500;
-reservoir_guesses = 10;
-initial_transient = 500;
-for conf = 1 : n_configs
+reservoir_guesses = 2;
+init_trans = 500;   % initial transient for the washout
+for conf_idx = 1 : n_configs
     % ESN's (random) parameters
-    [Nr, inputScaling, rho_desired, lambda, mode] = get_rand_hyperparametrization(max_Nr);
+    conf = get_rand_hyperparams(max_Nr);
+    inputScaling = conf.inputScaling;   Nr = conf.Nr;   mode = conf.mode;
+    rho_desired = conf.rho_desired;     lambda = conf.lambda;
 
-    % train ESN (for a certain number of reservoir guesses)
-    best_hyper_conf = get_hyperparams_conf(Nr, inputScaling, rho_desired, lambda, mode);    
-    min_val_mse = Inf;
+    % TRAIN ESN (for a certain number of reservoir guesses)
+    best_conf = conf;   min_val_mse = Inf;
     val_mse = zeros(1, reservoir_guesses);
     for guess = 1 : reservoir_guesses
-        % initialize ESN's Win and Wr
+        % INITIALIZE ESN's Win and Wr
         [Win, Wr] = esn(inputScaling, 1, Nr, rho_desired);
 
-        % compute the states for the training input sequence
-        X = zeros(Nr, length(tr_input));   % states matrix
-        for t = 1 : length(tr_input)
-            prev_state = get_prev_state(X, t, zeros(Nr, 1));
-            X(:,t) = tanh(Win*[tr_input(t);1] + Wr*prev_state);
-        end
+        % COMPUTE STATES for training and validation input sequences
+        [X_tr, X_val] = esn_compute_states(tr_input, val_input, Nr, Win, Wr);
 
-        % washout
-        X = X(:, initial_transient+1 : end);
-        tr_target_cut = tr_target(:, initial_transient+1 : end);
+        % WASHOUT
+        X_tr = X_tr(:, init_trans + 1 : end);
+        tr_target_cut = tr_target(:, init_trans + 1 : end);
+        
+        % READOUT TRAINING
+        Wout = esn_readout_training(mode, tr_target_cut, X_tr, lambda, Nr);
 
-        % readout training
-        X = [X; ones(1, length(tr_target_cut))];
-        if mode == "pinv"
-            % using pseudo-inverse
-            Wout = tr_target_cut * pinv(X);
-        else
-            % using ridge regression
-            Wout = tr_target_cut * X' * inv(X*X' + lambda*eye(Nr+1));
-        end
-
-        % evaluation
-        for t = 1 : length(val_input)
-            prev_state = get_prev_state(X(1:end-1, :), t, X(1:end-1, end));
-            X(:, end+1) = [tanh(Win*[val_input(t); 1] + Wr*prev_state); 1];
-        end
-        val_output = Wout * X(:, end - length(val_input) + 1 : end);
+        % EVALUATION
+        val_output = Wout * X_val;
         val_mse(guess) = immse(val_output, val_target);
     end
     
     % average the validation performance over the reservoir guesses
     avg_val_mse = mean(val_mse);
         
-    % select best hyperparameters configuration
+    % SELECT BEST HYPER-PARAMETERIZATION
     if avg_val_mse < min_val_mse
         min_val_mse = avg_val_mse;
-        best_Win = Win;
-        best_Wr = Wr;
-        best_Wout = Wout;
-        best_hyper_conf = get_hyperparams_conf(...
-            Nr, inputScaling, rho_desired, lambda, mode);
+        best_conf = conf;
     end
 end
 
-% retrain the network on all the training data (tr + val)
-inputScaling = best_hyper_conf('inputScaling');
-Nr = best_hyper_conf('Nr');
-rho_desired = best_hyper_conf('rho_desired');
-[Win, Wr] = esn(inputScaling, 1, Nr, rho_desired);
-tr_input = [tr_input val_input];
-tr_target = [tr_target val_target];
-% tr_input = tr_input(:, initial_transient+1 : end);      % washout
-% tr_target = tr_target(:, initial_transient+1 : end);    % washout
-% compute the states for the training input sequence
-X = zeros(Nr, length(tr_input));   % states matrix
-for t = 1 : length(tr_input)
-    prev_state = get_prev_state(X, t, zeros(Nr, 1));
-    X(:,t) = tanh(Win*[tr_input(t);1] + Wr*prev_state);
-end
+
+% RETRAIN NETWORK ON DESIGN SET (tr + val) --------------------------------
+% re-create the best network
+[best_Win, best_Wr] = esn(best_conf.inputScaling, 1, best_conf.Nr, best_conf.rho_desired);
+
+des_input = [tr_input val_input];   % input of the "design set" (tr + val)
+des_target = [tr_target val_target];    % targets of the design set
+
+% compute the states for the design set and test set input sequences
+[X_des, X_ts] = esn_compute_states(des_input, ts_input, best_conf.Nr, best_Win, best_Wr);
+
 % washout
-X = X(:, initial_transient+1 : end);
-tr_target_cut = tr_target(:, initial_transient+1 : end);
+X_des = X_des(:, init_trans + 1 : end);
+des_target = des_target(:, init_trans+1 : end);
+
 % readout training
-X = [X; ones(1, length(tr_target_cut))];
-if mode == "pinv"
-    % using pseudo-inverse
-    Wout = tr_target_cut * pinv(X);
-else
-    % using ridge regression
-    Wout = tr_target_cut * X' * inv(X*X' + lambda*eye(Nr+1));
-end
+best_Wout = esn_readout_training(best_conf.mode, des_target, X_des, best_conf.lambda, best_conf.Nr);
+
+% evaluation
+des_output = best_Wout * X_des;
+ts_output = best_Wout * X_ts;
+des_mse = immse(des_output, des_target);
+ts_mse = immse(ts_output, ts_target);
 
 
-% TODO: evaluate the model on development and test set
-
-
-% save the weights of the ESN corresponding top the best hyperparametrization
+% SAVE OUTPUTS ------------------------------------------------------------
+% save the weights of the ESN corresponding top the best hyperparameterization
 out_dir = "output";
-save(fullfile(out_dir, 'Win_best_hyperparametrization.mat'), 'best_Win');
-save(fullfile(out_dir, 'Wr_best_hyperparametrization.mat'), 'best_Wr');
-save(fullfile(out_dir, 'Wout_best_hyperparametrization.mat'), 'best_Wout');
-% save the containers.Map with the best hyperparametrization
-save(fullfile(out_dir, 'best_hyperparametrization.mat'), 'best_hyper_conf');
+save(fullfile(out_dir, 'best_Win.mat'), 'best_Win');
+save(fullfile(out_dir, 'best_Wr.mat'), 'best_Wr');
+save(fullfile(out_dir, 'best_Wout.mat'), 'best_Wout');
+% save the struct with the best hyperparameterization
+save(fullfile(out_dir, 'best_hyperparams.mat'), 'best_conf');
 
 
 % TODO: save training, validation and test MSE
