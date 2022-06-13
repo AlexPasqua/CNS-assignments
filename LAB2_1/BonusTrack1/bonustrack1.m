@@ -5,12 +5,11 @@ data = readmatrix("../lab2_1_data.csv");
 w = (1 + 1) .* rand(height(data), 1) - 1;
 
 % iterate over epochs
-lr = 0.009;
-alpha = 0.009;
-epochs = 50;
+lr = 0.000001;
+epochs = 10000;
+threshold = 0.00001;
 w_evolution = [];
 w_norm_evolution = [];
-converged = false;
 for epoch = 1 : epochs
     % shuffle the data
     data = data(:, randperm(length(data)));
@@ -20,17 +19,12 @@ for epoch = 1 : epochs
         pattern = data(:, n);
         output = dot(w, pattern);
         
-        % weights update (Oja rule)
-        delta_w = output .* pattern - alpha * output^2 .* w;
+        % weights update (BCM rule)
+        delta_w = output * pattern * (output - threshold);
         w_new = w + lr .* delta_w;
         
-        if norm(w_new - w) < 0.00001
-            converged = true;
-            w = w_new;
-            disp("Learning converged before reaching maximum epochs")
-            disp(strcat("Epochs completed: ", string(epoch)))
-            break
-        end
+        % update threshold (BCM rule)
+        threshold = output^2 - threshold;
         
         w = w_new;
     end

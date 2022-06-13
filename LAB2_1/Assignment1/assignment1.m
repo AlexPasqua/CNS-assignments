@@ -18,7 +18,7 @@ for epoch = 1 : epochs
         pattern = data(:, n);
         output = dot(w, pattern);
         
-        % weights update
+        % weights update (Hebbian rule)
         w_new = w + (lr * output) .* pattern;
 
         % terminate learning if converged

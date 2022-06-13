@@ -21,7 +21,7 @@ for epoch = 1 : epochs
         pattern = data(:, t);
         output = dot(w, pattern);
         
-        % weights update
+        % weights update (subtractive normalization rule)
         term1 = output.*pattern;
         term2 = dot(n, pattern).*n ./ length(n);
         delta_w = term1 - term2';
