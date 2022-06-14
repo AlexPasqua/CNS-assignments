@@ -4,10 +4,12 @@ data = readmatrix("../lab2_1_data.csv");
 % uniformly initialize weight vector over [-1, 1]
 w = (1 + 1) .* rand(height(data), 1) - 1;
 
+% set threshold used in the weight update as the average of patterns
+threshold = mean(data, 2);
+
 % iterate over epochs
-lr = 0.000001;
-epochs = 10000;
-threshold = 0.00001;
+lr = 0.01;
+epochs = 50;
 w_evolution = [];
 w_norm_evolution = [];
 for epoch = 1 : epochs
@@ -19,12 +21,11 @@ for epoch = 1 : epochs
         pattern = data(:, n);
         output = dot(w, pattern);
         
-        % weights update (BCM rule)
-        delta_w = output * pattern * (output - threshold);
+        % weights update (covariance rule: introducing LTD factor)
+            % with pre-synaptic and high post-synaptic activity: potentiate connection
+            % with pre-synaptic and low post-synaptic activity: depress connection
+        delta_w = (output - threshold) .* pattern;
         w_new = w + lr .* delta_w;
-        
-        % update threshold (BCM rule)
-        threshold = output^2 - threshold;
         
         w = w_new;
     end
