@@ -48,7 +48,7 @@ plot(tspan, v_array, [0 t1 t1 t1+inp_span t1+inp_span max(tspan)], ...
 title(ax1, "Membrane potential dynamics")
 xlabel("Time")
 ylabel("Membrane potential")
-legend("Membrane potential", "Input current")
+legend("Membrane potential", "Input current", "Accentuation of the obscillation")
 
 ax2 = nexttile;
 plot(v_array, u_array)

@@ -10,7 +10,6 @@ epochs = 100;
 n = ones(1, length(data(:,1)));
 w_evolution = [];
 w_norm_evolution = [];
-converged = false;
 idx = 1;
 for epoch = 1 : epochs
     % shuffle the data
