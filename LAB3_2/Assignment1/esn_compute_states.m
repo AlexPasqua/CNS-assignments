@@ -8,6 +8,7 @@ for t = 1 : tot_len
     X(:,t) = tanh(Win*[whole_inp(t);1] + Wr*prev_state);
 end
 X = [X; ones(1, tot_len)];  % add ones for bias
+% divide seq of states into training and test part
 X_tr = X(:, 1 : length(tr_inp));
 X_ts = X(:, length(tr_inp) + 1 : end);
 end
